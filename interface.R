@@ -119,7 +119,7 @@ ux_matrix <- function(input, model_number) {
       )
     )
     
-    heemod::define_transition_(
+    heemod:::define_transition_(
       .dots = lazyeval::as.lazy_dots(mat_values),
       state_names = ux_state_names(input)
     )
@@ -250,7 +250,7 @@ ux_run_models_raw <- function(input, values) {
     method = ux_method(input),
     cost = ux_cost(input),
     effect = ux_effect(input),
-    state_cycle_limit = NULL,
+    state_time_limit = NULL,
     central_strategy = NULL,
     inflow = rep(0, length(ux_init(input)))
   )
