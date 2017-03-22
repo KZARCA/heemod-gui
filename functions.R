@@ -309,7 +309,11 @@ show_next <- function(val, trigger, input, values, FUN){
 prepare_timedep <- function(n, edit, input, values) {
   table_body <- tagList(
     column(2, textInput(paste0("timedepName", n), NULL, ifelse(!is.null(input[[paste0("timedepName", n)]]), input[[paste0("timedepName", n)]], ""))),
-    column(2, selectInput(paste0("timedepType", n), NULL, choices = c("Constant variation with the number of cycles" = "constant", "Non-constant variation with the number of cycles" = "nonConstant"), selected = ifelse(!is.null(input[[paste0("timedepType", n)]]), input[[paste0("timedepType", n)]], character(0)))),
+    column(2, selectInput(paste0("timedepType", n), NULL, 
+                          choices = c("Constant variation with the number of cycles" = "constant", 
+                                                                      "Non-constant variation with the number of cycles since model start" = "nonConstantModelTime", 
+                                                                      "Non-constant variation with the number of cycles since entering a state" = "nonConstantStateTime"), 
+                          selected = ifelse(!is.null(input[[paste0("timedepType", n)]]), input[[paste0("timedepType", n)]], character(0)))),
     column(8, renderUI({
       fluidRow(
         if (!is.null(input[[paste0("timedepType", n)]])){
