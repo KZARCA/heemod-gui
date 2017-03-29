@@ -95,6 +95,19 @@ ux_parse_timedep <- function(x, nTimedepNC, input){
   
 }
 
+ux_parse_survival <- function(x, input){
+  purrr::map(seq_len(x)-1, function(i){
+    lambda <- input[[paste0("survivalLambda", i)]]
+    if(input[[paste0("survivalDistribution", i)]] == "Weibull"){
+      lambda <- input[[paste0("survivalLambda", i)]]
+      k <- input[[paste0("survivalK", i)]]
+      sprintf("1 - exp(%s * ((model_time - 1)^%s - model_time^%s))", lambda, k, k)
+    } 
+  }) %>% setNames(
+    unlist(shiny_subset(input, paste0("survivalName", seq_len(x)-1)))
+  )
+}
+
 
 ux_parameters <- function(input, values) {
   
@@ -109,11 +122,11 @@ ux_parameters <- function(input, values) {
   # } else {
   #   list_rgho <- NULL
   # }
-  # if (info_param$nSurvival > 0) {
-  #   list_survival <- ux_parse_survival(info_param$nSurvival, input)
-  # } else {
-  #   list_survival <- NULL
-  # }
+  if (info_param$nSurvival > 0) {
+    list_survival <- ux_parse_survival(info_param$nSurvival, input)
+  } else {
+    list_survival <- NULL
+  }
   if (info_param$nTimedep > 0) {
     nTimedepNC <- ux_nb_timedepNC(info_param$nTimedep, values) # we need this function to keep reactivity... I don't understand why...
     list_timedep <- ux_parse_timedep(info_param$nTimedep, nTimedepNC, input)
