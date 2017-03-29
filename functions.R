@@ -382,20 +382,18 @@ prepare_timedep <- function(n, edit, input, values) {
 }
 prepare_rgho <- function(n, edit, input, values) {
   table_body <- tagList(
-    isolate(column(2, textInput(paste0("rghoName", n), NULL, ifelse(!is.null(input[[paste0("rghoName", n)]]), input[[paste0("rghoName", n)]], "")))),
-    isolate(column(2, textInput(paste0("rghoStartAge", n), NULL, ifelse(!is.null(input[[paste0("rghoStartAge", n)]]), input[[paste0("rghoStartAge", n)]], "")))),
-    isolate(column(2, selectInput(paste0("rghoGender", n), NULL, choices = c(Female = "FMLE", Male = "MLE"), selected = input[[paste0("rghoGender", n)]]))),
-    column(2, searchRegion(n, input)),
-    column(2, renderUI({
+    isolate(column(3, textInput(paste0("rghoName", n), NULL, ifelse(!is.null(input[[paste0("rghoName", n)]]), input[[paste0("rghoName", n)]], "")))),
+    isolate(column(3, selectInput(paste0("rghoGender", n), NULL, choices = c(Female = "FMLE", Male = "MLE"), selected = input[[paste0("rghoGender", n)]]))),
+    column(3, searchRegion(n, input)),
+    column(3, renderUI({
       searchCountry(n, input)
     }))
   )
   table_title <- tagList(
-    column(2, strong("Name")),
-    column(2, strong("Age at beginning")),
-    column(2, strong("Gender")),
-    column(2, strong("Region")),
-    column(2, strong("Country"))
+    column(3, strong("Name")),
+    column(3, strong("Gender")),
+    column(3, strong("Region")),
+    column(3, strong("Country"))
   )
   return(list(title = table_title, body = table_body))
 }

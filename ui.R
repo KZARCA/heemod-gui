@@ -270,6 +270,7 @@ function(request) {
                   "half-cycle", "life-table", "spread-half-cycle"),
                 selected = "life-table"
               ),
+              numericInput("startAge", value = NA, label = "Age at the beginning"),
               numericInput("cycles", value = 10, label = "Number of cycle"),
               conditionalPanel(
                 condition = "input.checkShowHelp == 1",
