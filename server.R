@@ -34,15 +34,16 @@ shinyServer(function(input, output, session) {
     local_values$restoring_time <- Sys.time()
   })
   
+  
   observe({
     req(local_values$restoring > 0)
-    local_values$order_restore <- c("tab_global_parameters", "tab_dsa", "tab_psa", local_values$last_tab)
+    local_values$order_restore <- c("tab_states", "tab_transition_matrix", "tab_global_parameters", "tab_states_parameters", "tab_dsa", "tab_psa", local_values$last_tab)
     local_values$final_restore <- length(local_values$order_restore) + 1
     purrr::walk2(seq_len(local_values$final_restore - 1), local_values$order_restore, function(x, y){
       observe({
         if (local_values$restoring == x){
           invalidateLater(100)
-          if (Sys.time() - local_values$restoring_time > 2){
+          if (Sys.time() - local_values$restoring_time > 1){
             shinydashboard::updateTabItems(session, "main", y )
             local_values$restoring <- x + 1
             local_values$restoring_time <- Sys.time()
@@ -243,14 +244,14 @@ shinyServer(function(input, output, session) {
     textInput(
       "costVariable",
       label = "Cost Variable",
-      value = input$variableStateName1
+      value = ifelse(!is.null(input$costVariable), input$costVariable, input$variableStateName1)
     )
   })
   output$effectVariable <- renderUI({
     textInput(
       "effectVariable",
       label = "Effect Variable",
-      value = input$variableStateName2
+      value = ifelse(!is.null(input$effectVariable), input$effectVariable, input$variableStateName2)
     )
   })
   

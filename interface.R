@@ -62,25 +62,73 @@ ux_parse_equation <- function(x, input) {
   )
 }
 
+ux_nb_timedepNC <- function(x, values){
+  purrr::map(seq_len(x)-1, function(i){
+    if (!is.null(values[[paste0("nTimedepNC", i)]])){
+      stats::setNames(values[[paste0("nTimedepNC", i)]], paste0("nTimedepNC", i))
+    } 
+  })
+}
+
+ux_parse_timedep <- function(x, nTimedepNC, input){
+  purrr::map(seq_len(x)-1, function(i){
+    if(!is.null(nTimedepNC[[i+1]])){
+      timedepType <- ifelse(input[[paste0("timedepType", i)]] == "nonConstantModelTime", "model_time", "state_time")
+      tmp <- dplyr::data_frame(
+        value = shiny_subset(input, paste_("timedepValueNC", i, seq(0, nTimedepNC[[i+1]]))) %>% unlist,
+        start = shiny_subset(input, paste_("timedepStart", i, seq(0, nTimedepNC[[i+1]]))) %>% unlist,
+        end = shiny_subset(input, paste_("timedepEnd", i, seq(0, nTimedepNC[[i+1]]))) %>% unlist
+      ) %>%
+        #mutate(exprif = sprintf("%s >= %s & %s <= %s", "model_time", start, "model_time", end))
+        mutate(expr = sprintf("ifelse(%s >= %s & %s <= %s, %s, ", timedepType, start, timedepType, end, value))
+      l <- nrow(tmp)
+      expr <- c(tmp$expr, tmp$value[l])
+      sprintf("%s%s", paste0(expr, collapse = ""), paste0(rep(")" , l), collapse = ""))
+
+      #sprintf("dplyr::case_when(%s)", paste0(tmp$exprif, " ~ ", tmp$value, collapse = ", ")) 
+    } else {
+      shiny_subset(input, paste0("timedepValueC", i)) %>% unlist %>% unname
+    }
+  }) %>% setNames(
+    unlist(shiny_subset(input, paste0("timedepName", seq_len(x)-1)))
+  )
+  
+}
+
+
 ux_parameters <- function(input, values) {
   
   info_param <- ux_nb_parameters(values)
-  
   if (info_param$nEquation > 0) {
     list_equation <- ux_parse_equation(info_param$nEquation, input)
   } else {
     list_equation <- NULL
   }
+  # if (info_param$nRgho > 0) {
+  #   list_rgho <- ux_parse_rgho(info_param$nRgho, input)
+  # } else {
+  #   list_rgho <- NULL
+  # }
+  # if (info_param$nSurvival > 0) {
+  #   list_survival <- ux_parse_survival(info_param$nSurvival, input)
+  # } else {
+  #   list_survival <- NULL
+  # }
+  if (info_param$nTimedep > 0) {
+    nTimedepNC <- ux_nb_timedepNC(info_param$nTimedep, values) # we need this function to keep reactivity... I don't understand why...
+    list_timedep <- ux_parse_timedep(info_param$nTimedep, nTimedepNC, input)
+  } else {
+    list_timedep <- NULL
+  }
   
   trim <- function(x) gsub("^\\s+|\\s+$", "", x)
   
   list_param <- c(
-    list_equation
+    list_equation,
+    list_timedep
   )
-  
   if (length(list_param)) {
     names(list_param) <- trim(names(list_param))
-    
     heemod::define_parameters_(
       lazyeval::as.lazy_dots(list_param)
     )
@@ -134,13 +182,12 @@ ux_matrix <- function(input, model_number) {
 
 ux_state <- function(input, model_number, state_number) {
   state_value_names <- ux_state_value_names(input)
-  
   state_values <- sprintf(
-    "heemod::discount(%s, %e)",
+    "heemod::discount(%s, %e, %s)",
     unlist(
       shiny_subset(
         input,
-        paste0(
+        paste_(
           "stateVariable",
           model_number,
           seq_len(ux_nb_state_values(input)),
@@ -151,13 +198,14 @@ ux_state <- function(input, model_number, state_number) {
     unlist(
       shiny_subset(
         input,
-        paste0(
+        paste_(
           "discountingRate",
           model_number,
           seq_len(ux_nb_state_values(input))
         )
       )
-    ) / 100
+    ),
+    ifelse(ux_method(input) == "beginning", TRUE, FALSE)
   )
   
   names(state_values) <- state_value_names
@@ -184,6 +232,10 @@ ux_state_list <- function(input, model_number) {
 }
 
 ux_model <- function(input, values, model_number) {
+  ux_state_list(
+    input = input,
+    model_number = model_number
+  )
   heemod::define_strategy_(
     transition = ux_matrix(
       input = input,
@@ -193,7 +245,7 @@ ux_model <- function(input, values, model_number) {
       input = input,
       model_number = model_number
     )
-  )
+  ) 
 }
 
 ux_init <- function(input) {
@@ -204,7 +256,7 @@ ux_init <- function(input) {
         paste0("init", seq_len(ux_nb_states(input)))
       )
     )
-  )
+  ) 
 }
 
 ux_cycles <- function(input) {
@@ -237,9 +289,10 @@ ux_run_models_raw <- function(input, values) {
         model_number = x
       )
   )
+  
   names(list_models) <- ux_model_names(input)
   
-  heemod::run_model_(
+   heemod::run_model_(
     parameters = ux_parameters(
       input = input,
       values = values
@@ -253,14 +306,14 @@ ux_run_models_raw <- function(input, values) {
     state_time_limit = NULL,
     central_strategy = NULL,
     inflow = rep(0, length(ux_init(input)))
-  )
+  ) 
 }
 
 ux_run_models <- function(input, values) {
   res <- try({
     ux_run_models_raw(input, values)
   }, 
-  silent = TRUE)
+  silent = FALSE)
   
   if ("try-error" %in% class(res)) {
     NULL

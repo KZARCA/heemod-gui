@@ -93,11 +93,11 @@ showStateParam <- function(nbStrat, input, values, click) {
                       function (j) {
                         isolate({
                           tags$td(textInput(
-                            paste0("stateVariable",x,i,j),
+                            paste_("stateVariable",x,i,j),
                             value = ifelse(click == TRUE, 
-                                           ifelse(!is.null(input[[paste0("stateVariable",1,i,j)]]), input[[paste0("stateVariable",1,i,j)]], 0),
-                                           ifelse (!is.null(input[[paste0("stateVariable",x,i,j)]]), input[[paste0("stateVariable",x,i,j)]], 
-                                                   ifelse(!is.null(input[[paste0("stateVariable",1,i,j)]]),input[[paste0("stateVariable",1,i,j)]],0)
+                                           ifelse(!is.null(input[[paste_("stateVariable",1,i,j)]]), input[[paste_("stateVariable",1,i,j)]], 0),
+                                           ifelse (!is.null(input[[paste_("stateVariable",x,i,j)]]), input[[paste_("stateVariable",x,i,j)]], 
+                                                   ifelse(!is.null(input[[paste_("stateVariable",1,i,j)]]),input[[paste_("stateVariable",1,i,j)]],0)
                                            )),
                             label = NULL,
                             width="100%"))
@@ -105,13 +105,13 @@ showStateParam <- function(nbStrat, input, values, click) {
                       }),
                     isolate({
                       tags$td(numericInput(
-                        paste0("discountingRate",x,i),
+                        paste_("discountingRate",x,i),
                         label = NULL,
                         step=1,
                         value = ifelse(click == TRUE, 
-                                       ifelse(!is.null(input[[paste0("discountingRate",1,i)]]), input[[paste0("discountingRate",1,i)]], 0),
-                                       ifelse(!is.null(input[[paste0("discountingRate",x,i)]]), input[[paste0("discountingRate",x,i)]], 
-                                              ifelse(!is.null(input[[paste0("discountingRate",1,i)]]), input[[paste0("discountingRate",1,i)]],0)
+                                       ifelse(!is.null(input[[paste_("discountingRate",1,i)]]), input[[paste_("discountingRate",1,i)]], 0),
+                                       ifelse(!is.null(input[[paste_("discountingRate",x,i)]]), input[[paste_("discountingRate",x,i)]], 
+                                              ifelse(!is.null(input[[paste_("discountingRate",1,i)]]), input[[paste_("discountingRate",1,i)]],0)
                                        )),
                         width="100%"))
                     })
