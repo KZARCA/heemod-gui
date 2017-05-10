@@ -92,7 +92,6 @@ ux_parse_timedep <- function(x, nTimedepNC, input){
   }) %>% setNames(
     unlist(shiny_subset(input, paste0("timedepName", seq_len(x)-1)))
   )
-  
 }
 
 ux_parse_survival <- function(x, input){
@@ -108,8 +107,22 @@ ux_parse_survival <- function(x, input){
   )
 }
 
+ux_parse_rgho <- function(x, input){
+  purrr::map(seq_len(x)-1, function(i){
+    sprintf('heemod::get_who_mr(age, sex = "%s", region = "%s", country = "%s")', input[[paste0("rghoGender", i)]], input[[paste0("rghoRegion", i)]], input[[paste0("rghoCountry", i)]])
+  }) %>% setNames(
+    unlist(shiny_subset(input, paste0("rghoName", seq_len(x)-1)))
+  )
+}
+
+ux_sex <- function(input){
+  shQuote(shiny_subset(input, "rghoGender0"),type = "cmd") %>%
+  setNames("sex")
+}
+
 
 ux_parameters <- function(input, values) {
+  compact <- purrr::compact
   
   info_param <- ux_nb_parameters(values)
   if (info_param$nEquation > 0) {
@@ -117,11 +130,11 @@ ux_parameters <- function(input, values) {
   } else {
     list_equation <- NULL
   }
-  # if (info_param$nRgho > 0) {
-  #   list_rgho <- ux_parse_rgho(info_param$nRgho, input)
-  # } else {
-  #   list_rgho <- NULL
-  # }
+  if (info_param$nRgho > 0) {
+    list_rgho <- ux_parse_rgho(info_param$nRgho, input)
+  } else {
+    list_rgho <- NULL
+  }
   if (info_param$nSurvival > 0) {
     list_survival <- ux_parse_survival(info_param$nSurvival, input)
   } else {
@@ -133,13 +146,19 @@ ux_parameters <- function(input, values) {
   } else {
     list_timedep <- NULL
   }
-  
   trim <- function(x) gsub("^\\s+|\\s+$", "", x)
   
+  age <- ux_age(input)
+  sex <- ux_sex(input)
   list_param <- c(
+    age,
+    sex,
     list_equation,
-    list_timedep
+    list_rgho,
+    list_timedep,
+    list_survival
   )
+  
   if (length(list_param)) {
     names(list_param) <- trim(names(list_param))
     heemod::define_parameters_(
@@ -154,12 +173,16 @@ ux_use_morta <- function(input) {
   input$use_morta
 }
 
-ux_morta_age <- function(input) {
-  input$startAge
-}
 
-ux_morta_sex <- function(input) {
-  input$gender
+ux_age <- function(input){
+  if(!is.na(input$startAge) & !is.na(input$cycleDuration)){
+    list(
+      input$startAge,
+      input$cycleDuration,
+      "age_init + model_time * cycle_duration"
+    ) %>%
+      setNames(c("age_init", "cycle_duration", "age"))
+  }
 }
 
 ux_morta_country <- function(input) {
@@ -220,9 +243,7 @@ ux_state <- function(input, model_number, state_number) {
     ),
     ifelse(ux_method(input) == "beginning", TRUE, FALSE)
   )
-  
   names(state_values) <- state_value_names
-  
   heemod::define_state_(
     lazyeval::as.lazy_dots(state_values)
   )
@@ -230,7 +251,6 @@ ux_state <- function(input, model_number, state_number) {
 
 ux_state_list <- function(input, model_number) {
   nb_states <- ux_nb_states(input)
-  
   list_states <- lapply(
     seq_len(nb_states),
     function(x)
@@ -262,14 +282,17 @@ ux_model <- function(input, values, model_number) {
 }
 
 ux_init <- function(input) {
-  as.vector(
-    unlist(
+  init <- unlist(
       shiny_subset(
         input,
         paste0("init", seq_len(ux_nb_states(input)))
       )
     )
-  ) 
+  n <- names(init)
+  init %>% 
+    as.vector %>%
+    as.character %>%
+    setNames(n)
 }
 
 ux_cycles <- function(input) {
@@ -302,10 +325,9 @@ ux_run_models_raw <- function(input, values) {
         model_number = x
       )
   )
-  
   names(list_models) <- ux_model_names(input)
-  
-   heemod::run_model_(
+
+  heemod::run_model_(
     parameters = ux_parameters(
       input = input,
       values = values
@@ -318,15 +340,16 @@ ux_run_models_raw <- function(input, values) {
     effect = ux_effect(input),
     state_time_limit = NULL,
     central_strategy = NULL,
-    inflow = rep(0, length(ux_init(input)))
+    inflow = rep("0", length(ux_init(input))) %>%
+      setNames(nm = paste0("inflow",seq_along(ux_init(input))))
   ) 
 }
 
 ux_run_models <- function(input, values) {
-  res <- try({
+  res <-# try({
     ux_run_models_raw(input, values)
-  }, 
-  silent = FALSE)
+  #}, 
+  #silent = FALSE)
   
   if ("try-error" %in% class(res)) {
     NULL

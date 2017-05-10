@@ -383,15 +383,15 @@ prepare_timedep <- function(n, edit, input, values) {
 prepare_rgho <- function(n, edit, input, values) {
   table_body <- tagList(
     isolate(column(3, textInput(paste0("rghoName", n), NULL, ifelse(!is.null(input[[paste0("rghoName", n)]]), input[[paste0("rghoName", n)]], "")))),
-    isolate(column(3, selectInput(paste0("rghoGender", n), NULL, choices = c(Female = "FMLE", Male = "MLE"), selected = input[[paste0("rghoGender", n)]]))),
+    isolate(column(3, selectInput(paste0("rghoGender", n), NULL, choices = c(Female = "FMLE", Male = "MLE", "Both"), selected = input[[paste0("rghoGender", n)]]))),
     column(3, searchRegion(n, input)),
     column(3, renderUI({
       searchCountry(n, input)
     }))
   )
   table_title <- tagList(
-    column(3, strong("Name")),
-    column(3, strong("Gender")),
+    column(2, strong("Name")),
+    column(2, strong("Gender")),
     column(3, strong("Region")),
     column(3, strong("Country"))
   )
@@ -401,11 +401,11 @@ prepare_rgho <- function(n, edit, input, values) {
 prepare_equation <- function(n, edit, input, values) {
   table_title <- tagList(
     column(2, strong("Name")),
-    column(2, strong("Value"))
+    column(7, strong("Value"))
   )
   table_body <- tagList(
     column(2, textInput(paste0("equationName", n), NULL, ifelse(!is.null(input[[paste0("equationName", n)]]), input[[paste0("equationName", n)]], ""))),
-    column(2, textInput(paste0("equationValue", n), NULL, ifelse(!is.null(input[[paste0("equationValue", n)]]), input[[paste0("equationValue", n)]], "")))
+    column(7, textInput(paste0("equationValue", n), NULL, ifelse(!is.null(input[[paste0("equationValue", n)]]), input[[paste0("equationValue", n)]], "")))
   )
   return(list(title = table_title, body = table_body))
 }
@@ -417,11 +417,11 @@ prepare_survival <- function(n, edit, input, values) {
              fluidRow(
                column(2, textInput(paste0("survivalName", n), NULL, ifelse(!is.null(input[[paste0("survivalName", n)]]), input[[paste0("survivalName", n)]], ""))),
                column(2, selectInput(paste0("survivalDistribution", n), NULL, choices = c("Exponential", "Weibull"), selected = ifelse (!is.null(input[[paste0("survivalDistribution", n)]]), input[[paste0("survivalDistribution", n)]], ""))),
-               column(2, numericInput(paste0("survivalLambda", n), NULL, 
+               column(3, textInput(paste0("survivalLambda", n), NULL, 
                                       isolate(ifelse(!is.null(input[[paste0("survivalLambda", n)]]), input[[paste0("survivalLambda", n)]], "")))),
-               column(2, 
+               column(3, 
                       if (!is.null(input[[paste0("survivalDistribution", n)]]) && input[[paste0("survivalDistribution", n)]] == "Weibull"){
-                        isolate(numericInput(paste0("survivalK", n), NULL, ifelse(!is.null(input[[paste0("survivalK", n)]]), input[[paste0("survivalK", n)]],"")))
+                        isolate(textInput(paste0("survivalK", n), NULL, ifelse(!is.null(input[[paste0("survivalK", n)]]), input[[paste0("survivalK", n)]],"")))
                       }
                ))
            })

@@ -4,8 +4,6 @@ shinyServer(function(input, output, session) {
                            removeDSA = FALSE, removePSA = FALSE)
   local_values <- reactiveValues(restoring = 0, restoring_time = Sys.time(), show_masker = FALSE, all_updated = FALSE)
 
-
-  
   onBookmark(function(state) {
     nameValues <- names(reactiveValuesToList(values))
     purrr::walk(nameValues, function(x){
@@ -133,33 +131,6 @@ shinyServer(function(input, output, session) {
   }) 
   
   
-  observe({
-    inFile <- input$loadButton
-    if (is.null(inFile))
-      return(NULL)
-    else {
-      load(inFile$datapath)
-      updateNumericInput(session, "nbStates", value = input$nbStates)
-      updateNumericInput(session, "nbStateVariables", value = input$nbStateVariables)
-      updateNumericInput(session, "nbStrategies", value = input$nbStrategies)
-      updateCheckboxInput(session, "use_morta", value = input$use_morta)
-      updateNumericInput(session, "startAge", value = input$startAge)
-      updateNumericInput(session, "cycleLength", value = input$cycleLength)
-      updateRadioButtons(session, "gender", selected = input$gender)
-      updateSelectInput(session,"countMethod", selected = input$countMethod)
-      updateNumericInput(session, "cycles", value = input$cycles)
-    }
-  })
-  
-  output$saveButton <- downloadHandler(
-    filename = function() {
-      paste0('data-', Sys.Date(), '.RData')
-    },
-    content = function(file) {
-      save(input, values, file=file)
-    }
-  )
-  
   output$nameStates <- renderUI({
     req(input$nbStates)
     lapply(
@@ -244,14 +215,14 @@ shinyServer(function(input, output, session) {
     textInput(
       "costVariable",
       label = "Cost Variable",
-      value = ifelse(!is.null(input$costVariable), input$costVariable, input$variableStateName1)
+      value = ifelse(!is.null(input$costVariable), input$costVariable, ifelse(!is.null(input$variableStateName1), input$variableStateName1, NA))
     )
   })
   output$effectVariable <- renderUI({
     textInput(
       "effectVariable",
       label = "Effect Variable",
-      value = ifelse(!is.null(input$effectVariable), input$effectVariable, input$variableStateName2)
+      value = ifelse(!is.null(input$effectVariable), input$effectVariable, ifelse(!is.null(input$variableStateName2), input$variableStateName2, NA))
     )
   })
   
@@ -622,9 +593,10 @@ shinyServer(function(input, output, session) {
   
   output$outModel <- renderUI({
     #####
-    values$model <- ux_run_models(input = input, values = values)
+    req(input$init1)
+    input$reload_results
+    isolate(values$model <- ux_run_models(input = input, values = values))
     values$summary_model <- summary(values$model)
-    
     if (is.null(values$model)) {
       tagList(tags$h3("Model specification incomplete"))
     } else {
@@ -661,11 +633,10 @@ shinyServer(function(input, output, session) {
       tags$h3("Model comparison")
     )
   })
-  
+  # 
   output$plotCE <- renderPlot({
     req(values$model)
     req(values$summary_model$res_comp)
-    
     plot(values$model, type = "ce")
   },
   width = 600)

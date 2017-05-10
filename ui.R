@@ -1,3 +1,26 @@
+jscode2 <- "
+shinyjs.init = function() {$(document).on({
+'shiny:idle':function(event) {
+      $('#lastIdle').val($.now());
+    }
+  })
+}
+shinyjs.getLastUpdate = function(){
+  $('#lastUpdate').val($.now());
+}
+shinyjs.restoreTabs = function(){
+  while ($('#lastIdle').val() + 500 < $.now()){
+    
+  }
+}
+"
+
+jscode <- "
+shinyjs.init = function(){
+  var maintenant = $.now();
+  //Shiny.onInputChange('main', 'tab_transition_matrix');
+}
+"
 function(request) {
   shinydashboard::dashboardPage(
     shinydashboard::dashboardHeader(title = "heemod"),
@@ -24,6 +47,7 @@ function(request) {
     ),
     shinydashboard::dashboardBody(
       shinyjs::useShinyjs(),
+      shinyjs::extendShinyjs(text = jscode),
       lang = "en-US",
       shinyjs::inlineCSS(list(
         ".row-eq-height"  = c(
@@ -271,7 +295,8 @@ function(request) {
                 selected = "life-table"
               ),
               numericInput("startAge", value = NA, label = "Age at the beginning"),
-              numericInput("cycles", value = 10, label = "Number of cycle"),
+              numericInput("cycles", value = 10, label = "Number of cycles"),
+              numericInput("cycleDuration", value = NA, label = "Duration of one cycle (years)"),
               conditionalPanel(
                 condition = "input.checkShowHelp == 1",
                 wellPanel(
@@ -301,6 +326,7 @@ function(request) {
               )
             ),
             mainPanel(
+              actionButton("reload_results", "Reload", icon = icon("refresh")),
               uiOutput("outModel"),
               DT::dataTableOutput("tableResults"),
               uiOutput("titleICER"),

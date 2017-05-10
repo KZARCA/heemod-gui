@@ -2,3 +2,5 @@
 .Rproj.user
 heemod-gui.Rproj
 shiny_bookmarks
+get_code.R
+.gitignore
