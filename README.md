@@ -1,6 +1,6 @@
 # heemod-gui
 
-User-friendly interface for the R package heemod (https://github.com/pierucci/heemod)
+User-friendly interface for the R [package heemod](https://cran.r-project.org/web/packages/heemod/index.html)
 
 ## Demo
 
