@@ -1,6 +1,7 @@
 # heemod-gui
 
-User-friendly interface for the R package [heemod](https://cran.r-project.org/web/packages/heemod/index.html)
+The R package [heemod](https://cran.r-project.org/web/packages/heemod/index.html) has high-level functions and quite easy to program with for R users. However, learning R can be an impediment in the adoption of `heemod.` 
+`heemod-gui` was created with `shiny` in order to provide a graphical user interface to program State Transition Models such as Markov Models, with a lot of features provided by the powerful `heemod` package. With `heemod-gui`, no coding is necessary to build a Decision Model in Health Economic Evaluation.
 
 ## Demo
 
