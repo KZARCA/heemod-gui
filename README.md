@@ -6,7 +6,7 @@ The R package [heemod](https://cran.r-project.org/web/packages/heemod/index.html
 
 With `heemod-gui`, no coding is necessary to build a Decision Model in Health Economic Evaluation.
 
-## Status
+## Status
 
 For now, only [heemod vignettes](https://cran.r-project.org/web/packages/heemod/vignettes/) from `a` to `d` are working.
 
