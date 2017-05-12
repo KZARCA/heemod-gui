@@ -208,7 +208,7 @@ ux_matrix <- function(input, model_number) {
     
     mat_values <- shiny_subset(
       input,
-      paste0(
+      paste_(
         "transmatrix",
         model_number,
         rep(seq_len(nb_states), each = nb_states),

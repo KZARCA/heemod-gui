@@ -184,11 +184,11 @@ showTransMatrix <- function(nbStrat, input, values, click) {
                         function(j) {
                           isolate(
                             tags$td(textInput(
-                              paste0("transmatrix",x,i,j),
+                              paste_("transmatrix",x,i,j),
                               value = ifelse(click == TRUE, 
-                                             ifelse(!is.null(input[[paste0("transmatrix",1,i,j)]]), input[[paste0("transmatrix",1,i,j)]], "0"),
-                                             ifelse(!is.null(input[[paste0("transmatrix",x,i,j)]]),input[[paste0("transmatrix",x,i,j)]],
-                                                    ifelse(!is.null(input[[paste0("transmatrix",1,i,j)]]), input[[paste0("transmatrix",1,i,j)]], "0")
+                                             ifelse(!is.null(input[[paste_("transmatrix",1,i,j)]]), input[[paste_("transmatrix",1,i,j)]], "0"),
+                                             ifelse(!is.null(input[[paste_("transmatrix",x,i,j)]]),input[[paste_("transmatrix",x,i,j)]],
+                                                    ifelse(!is.null(input[[paste_("transmatrix",1,i,j)]]), input[[paste_("transmatrix",1,i,j)]], "0")
                                              )),
                               label=NULL,
                               width="100%")))
