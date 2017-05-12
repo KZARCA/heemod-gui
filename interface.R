@@ -216,6 +216,14 @@ ux_matrix <- function(input, model_number) {
       )
     )
     
+    find_unauthorized <- purrr::compact(
+      filter_fun_lazydots(
+        lazyeval::as.lazy_dots(
+          mat_values
+        )
+      )
+    )
+    
     heemod:::define_transition_(
       .dots = lazyeval::as.lazy_dots(mat_values),
       state_names = ux_state_names(input)

@@ -10,6 +10,19 @@
 # AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
 #
 
+filter_fun_lazydots <- function(dots){
+  purrr::map(dots, function(x){
+    filter_fun(x$expr)
+  })
+}
+
+filter_fun <- function(expr){
+  all_funs <- pryr::fun_calls(expr)
+  authorized <- c("+", "-", "/", "*", "^", "log", "log10", "exp", 
+                  "sqrt", "mean", "median", "max", "min", "ifelse")
+  all_funs[!all_funs %in% authorized]
+}
+
 paste_ <- function(...){
   paste(..., sep = "_")
 }
