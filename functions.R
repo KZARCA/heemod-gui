@@ -397,8 +397,8 @@ prepare_rgho <- function(n, edit, input, values) {
     }))
   )
   table_title <- tagList(
-    column(2, strong("Name")),
-    column(2, strong("Gender")),
+    column(3, strong("Name")),
+    column(3, strong("Gender")),
     column(3, strong("Region")),
     column(3, strong("Country"))
   )
@@ -439,8 +439,8 @@ prepare_survival <- function(n, edit, input, values) {
            fluidRow(
              column(2, strong("Name")), 
              column(2, strong("Distribution")), 
-             column(2, strong("Lambda")),
-             column(2, renderUI({
+             column(3, strong("Lambda")),
+             column(3, renderUI({
                if (!is.null(input[[paste0("survivalDistribution", n)]]) && input[[paste0("survivalDistribution", n)]] == "Weibull"){
                  strong("k")
                }
