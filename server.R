@@ -234,17 +234,19 @@ shinyServer(function(input, output, session) {
   
   
   output$costVariable <- renderUI({
+    req(input$variableStateName1)
     textInput(
       "costVariable",
       label = "Cost Variable",
-      value = ifelse(!is.null(isolate(input$costVariable)), isolate(input$costVariable), ifelse(!is.null(input$variableStateName1), input$variableStateName1, NA))
+      value = ifelse(!is.null(isolate(input$costVariable)), isolate(input$costVariable), input$variableStateName1)
     )
   })
   output$effectVariable <- renderUI({
+    req(input$variableStateName2)
     textInput(
       "effectVariable",
       label = "Effect Variable",
-      value = isolate(ifelse(!is.null(isolate(input$effectVariable)), isolate(input$effectVariable), ifelse(!is.null(input$variableStateName2), input$variableStateName2, NA)))
+      value = isolate(ifelse(!is.null(isolate(input$effectVariable)), isolate(input$effectVariable), input$variableStateName2))
     )
   })
   

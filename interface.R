@@ -21,7 +21,7 @@ shiny_subset <- function(x, elem_names) {
 }
 
 ux_nb_models <- function(input) {
-  input$nbStrategies
+  ifelse(!is.na(input$nbStrategies),input$nbStrategies,0)
 }
 
 ux_model_names <- function(input) {
@@ -167,7 +167,7 @@ ux_parameters <- function(input, values, eval) {
     age,
     sex,
     list_equation,
-    if(eval)list_rgho,
+    if(eval) list_rgho,
     list_timedep,
     list_survival
   )
@@ -266,12 +266,14 @@ ux_state <- function(input, model_number, state_number) {
     ),
     ifelse(ux_method(input) == "beginning", TRUE, FALSE)
   )
-  names(state_values) <- state_value_names
-  unauthorized <- find_unauthorized(state_values, x = model_number, y = state_number)
-  if (!unauthorized){
-    heemod::define_state_(
-      lazyeval::as.lazy_dots(state_values)
-    )
+  if(length(state_values)){
+    names(state_values) <- state_value_names
+    unauthorized <- find_unauthorized(state_values, x = model_number, y = state_number)
+    if (!unauthorized){
+      heemod::define_state_(
+        lazyeval::as.lazy_dots(state_values)
+      )
+    }
   }
 }
 
@@ -332,17 +334,19 @@ ux_method <- function(input) {
 }
 
 ux_cost <- function(input) {
-  req(input$costVariable)
-  cost_variable <- setNames(input$costVariable, "cost variable")
-  unauthorized <- find_unauthorized(cost_variable)
-  if (!unauthorized) lazyeval::as.lazy(cost_variable)
+  if(!is.null(input$costVariable)){
+    cost_variable <- setNames(input$costVariable, "cost variable")
+    unauthorized <- find_unauthorized(cost_variable)
+    if (!unauthorized) lazyeval::as.lazy(cost_variable)
+  }
 }
 
 ux_effect <- function(input) {
-  req(input$effectVariable)
-  effect_variable <- setNames(input$effectVariable, "cost variable")
-  unauthorized <- find_unauthorized(effect_variable)
-  if (!unauthorized) lazyeval::as.lazy(effect_variable)
+  if(!is.null(input$effectVariable)){
+    effect_variable <- setNames(input$effectVariable, "cost variable")
+    unauthorized <- find_unauthorized(effect_variable)
+    if (!unauthorized) lazyeval::as.lazy(effect_variable)
+  }
 }
 
 ux_base_model <- function(input) {
