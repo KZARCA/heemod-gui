@@ -59,7 +59,7 @@ filter_fun <- function(expr){
   authorized <- c("+", "-", "/", "*", "^", "log", "log10", "exp", 
                   "sqrt", "median", "max", "min", "ifelse",
                   "==", "!=", "(", ">", "<", ">=", "<=", "::",
-                  "heemod", "discount")
+                  "heemod", "discount", "get_who_mr")
   all_funs[!all_funs %in% authorized]
 }
 

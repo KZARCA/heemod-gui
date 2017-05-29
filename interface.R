@@ -167,13 +167,12 @@ ux_parameters <- function(input, values, eval) {
     age,
     sex,
     list_equation,
-    if(eval) list_rgho,
+    list_rgho,
     list_timedep,
     list_survival
   )
   
   unauthorized <- find_unauthorized(list_param)
-  
   if(eval == TRUE & !unauthorized){
     if (length(list_param)) {
       names(list_param) <- trim(names(list_param))
@@ -364,7 +363,6 @@ ux_run_models_raw <- function(input, values) {
       )
   )
   names(list_models) <- ux_model_names(input)
-
   heemod::run_model_(
     parameters = ux_parameters(
       input = input,
