@@ -626,7 +626,8 @@ shinyServer(function(input, output, session) {
     req(values$summary_model$res_values)
     
     DT::datatable(
-      values$summary_model$res_values,
+      values$summary_model$res_values  %>%
+        mutate_if(is.numeric, function(x) prettyNum(x, big.mark = " ")),
       options = list(
         searching = FALSE,
         paging = FALSE,
@@ -660,7 +661,8 @@ shinyServer(function(input, output, session) {
     req(values$summary_model$res_comp)
     
     DT::datatable(
-      values$summary_model$res_comp,
+      values$summary_model$res_comp %>%
+        mutate_if(is.numeric, function(x) prettyNum(x, big.mark = " ")),
       options = list(
         searching = FALSE,
         paging = FALSE,
