@@ -822,6 +822,7 @@ shinyServer(function(input, output, session) {
           )
         )
       ),
+      uiOutput("addModule"),
       lapply(MODULES, function(module){
         fluidRow(
           column(12,
@@ -841,7 +842,7 @@ shinyServer(function(input, output, session) {
     ))
   shinyjs::onevent(
     "mouseleave",
-    "globalParameters",
+    "tabnewParam",
     shinyjs::hide(
       "tabnewParam",
       anim = FALSE,

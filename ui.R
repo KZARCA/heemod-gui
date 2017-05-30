@@ -53,11 +53,17 @@ function(request) {
         shinydashboard::menuItem(
           "Probabilistic Sensitivity Analysis", tabName = "tab_psa"),
         shinydashboard::menuItem(
-          "Results", tabName = "tab_results"),
-        shinydashboard::menuItem(
-          "Debug", tabName = "tab_debug")
-      )
-    ),
+          "Results",
+          shinydashboard::menuSubItem(
+            "Main results",
+            tabName = "tab_main_results"
+          ),
+          shinydashboard::menuSubItem(
+            HTML("Probabilistic Sensitivity Analysis"),
+            tabName = "tab_psa_results"
+          )
+          )
+    )),
     shinydashboard::dashboardBody(
       shinyjs::useShinyjs(),
       shinyjs::extendShinyjs(text = jscode),
@@ -179,8 +185,8 @@ function(request) {
         ),
         shinydashboard::tabItem(
           tabName = "tab_global_parameters",
-          uiOutput("globalParameters"),
-          uiOutput("addModule")
+          uiOutput("globalParameters")
+          
           #uiOutput("allModules")
         ), 
         shinydashboard::tabItem(
@@ -296,7 +302,7 @@ function(request) {
           )
         ),
         shinydashboard::tabItem(
-          tabName = "tab_results",
+          tabName = "tab_main_results",
           sidebarLayout(
             sidebarPanel(
               h3("Model parameters"),
@@ -352,15 +358,6 @@ function(request) {
               plotOutput("plotValues")
             )
           )
-        ),
-        shinydashboard::tabItem(
-          tabName = "tab_debug",
-          h3("Parameters"),
-          uiOutput("debugParams"),
-          h3("Models"),
-          uiOutput("debugModels"),
-          h3("Run Models"),
-          verbatimTextOutput("debugRunModels")
         )
       ),
       wellPanel(
