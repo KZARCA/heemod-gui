@@ -8,7 +8,7 @@ With `heemod-gui`, no coding is necessary to build a Decision Model in Health Ec
 
 ## Status
 
-Right now, only [heemod vignettes](https://cran.r-project.org/web/packages/heemod/vignettes/) from `a` to `d` can be reproduced on `heemod-gui`.
+Right now, [heemod vignettes](https://cran.r-project.org/web/packages/heemod/vignettes/) from `a` to `d` can be reproduced on `heemod-gui`.
 
 ## Demo
 
