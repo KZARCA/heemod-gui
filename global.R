@@ -13,6 +13,7 @@
 
 source("functions.R")
 source("interface.R")
+options(shiny.port=3456)
 
 library(dplyr)
 

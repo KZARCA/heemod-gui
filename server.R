@@ -373,7 +373,10 @@ shinyServer(function(input, output, session) {
       } else rem_choices <- choices
       tagList(
         column(2, selectizeInput(paste0("PSAGlobalParamName", i), "Variable name" , choices = rem_choices, selected = ifelse(!is.null(input[[paste0("PSAGlobalParamName", i)]]), input[[paste0("PSAGlobalParamName", i)]], ""))),
-        column(2, selectizeInput(paste0("PSADistrib", i), "Distribution", choices = c("", "Normal", "Lognormal", "Binomial", "Gamma", "Logitnormal", "Multinomial"), selected = ifelse(!is.null(input[[paste0("PSADistrib", i)]]), input[[paste0("PSADistrib", i)]], character(0)))),
+        column(2, selectizeInput(paste0("PSADistrib", i), "Distribution", 
+                                 choices = c("", "Normal", "Lognormal", "Binomial", "Gamma", "Logitnormal", 
+                                             "Multinomial", "Beta", "Triangle", "Poisson"), 
+                                 selected = ifelse(!is.null(input[[paste0("PSADistrib", i)]]), input[[paste0("PSADistrib", i)]], character(0)))),
         renderUI({
           req(stringr::str_length(input[[paste0("PSADistrib", i)]]) > 1)
             psa_param1 <- switch (input[[paste0("PSADistrib", i)]],
@@ -382,28 +385,37 @@ shinyServer(function(input, output, session) {
                                   "Binomial" = "Prop",
                                   "Gamma" = "Mean",
                                   "Logitnormal" = "Mu",
-                                  "Multinomial" = "Nb parameters"
+                                  "Multinomial" = "Nb parameters",
+                                  "Beta" = "Alpha",
+                                  "Triangle" = "Lower",
+                                  "Poisson" = "Mean"
             ) 
             psa_param2 <- switch (input[[paste0("PSADistrib", i)]],
                                   "Normal" = "SD",
                                   "Lognormal" = "SD",
                                   "Binomial" = "Size",
                                   "Gamma" = "SD",
-                                  "Logitnormal" = "Sigma"
-            )
+                                  "Logitnormal" = "Sigma",
+                                  "Beta" = "Beta",
+                                  "Triangle" = "Upper"            
+                                  )
             tagList(
               renderUI({
                 n_i <- i
                 tagList(
                   isolate(column(2, numericInput(paste0("PSAParam1", i), psa_param1, ifelse(!is.null(input[[paste0("PSAParam1", i)]]), input[[paste0("PSAParam1", i)]], NA)))),
-                  if (isolate(input[[paste0("PSADistrib", i)]] != "Multinomial")){
+                  if (isolate(input[[paste0("PSADistrib", i)]] != "Multinomial" & input[[paste0("PSADistrib", i)]] != "Poisson")){
                     tagList(
+                      # if (isolate(input[[paste0("PSADistrib", i)]] == "Lognormal")){
+                      #   isolate(column(1, style = "margin-top:20px", checkboxInput(paste0("PSAMeanLogscale", i), "Meanlog", value = ifelse(!is.null(input[[paste0("PSAMeanLogscale", i)]]), input[[paste0("PSAMeanLogscale", i)]], FALSE))))
+                      # },
                     isolate(column(2, numericInput(paste0("PSAParam2", i), psa_param2, ifelse(!is.null(input[[paste0("PSAParam2", i)]]), input[[paste0("PSAParam2", i)]], NA)))),
                     if (isolate(input[[paste0("PSADistrib", i)]] == "Lognormal")){
-                      isolate(column(2, style = "margin-top:20px", checkboxInput(paste0("PSALogscale", i), "Check if mean and sd are on the log scale", value = ifelse(!is.null(input[[paste0("PSALogscale", i)]]), input[[paste0("PSALogscale", i)]], FALSE))))
+                      isolate((column(2, checkboxGroupInput(paste0("PSALogscale", i), "On the Log Scale", choices = c("Mean", "SD"), selected = ifelse(!is.null(input[[paste0("PSALogscale", i)]]), input[[paste0("PSALogscale", i)]], character(0))))))
+                      #isolate(column(1, style = "margin-top:20px", checkboxInput(paste0("PSASDLogscale", i), "SDlog", value = ifelse(!is.null(input[[paste0("PSASDLogscale", i)]]), input[[paste0("PSASDLogscale", i)]], FALSE))))
                     }
                     )
-                  } else {
+                  } else if (isolate(input[[paste0("PSADistrib", i)]] == "Multinomial")) {
                     if(!is.null(input[[paste0("PSAParam1", i)]]) && !is.na(input[[paste0("PSAParam1", i)]]) && input[[paste0("PSAParam1", i)]] > 0){
                     isolate({
                       if (!is.null(local_values$other_to_multinom) && i == local_values$other_to_multinom){
@@ -601,15 +613,21 @@ shinyServer(function(input, output, session) {
                         label = NULL,
                         value = 0,
                         width="100%"
-                      )})))}))))
+                      )})))}))),
+      actionButton("startRunModel", "Start computation", class="btn-success"))
+  })
+  
+  observeEvent(input$startRunModel, {
+    values$model <- ux_run_models(input = input, values = values)
+    values$summary_model <- summary(values$model)
   })
   
   output$outModel <- renderUI({
     #####
     req(input$init1)
-    input$reload_results
-    isolate(values$model <- ux_run_models(input = input, values = values))
-    values$summary_model <- summary(values$model)
+    #input$reload_results
+    #isolate()
+    
     if (is.null(values$model)) {
       tagList(tags$h3("Model specification incomplete"))
     } else {
@@ -627,7 +645,7 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(
       values$summary_model$res_values  %>%
-        mutate_if(is.numeric, function(x) prettyNum(x, big.mark = " ")),
+        mutate_if(is.numeric, function(x) prettyNum(x, big.mark = " ")),
       options = list(
         searching = FALSE,
         paging = FALSE,
@@ -662,7 +680,7 @@ shinyServer(function(input, output, session) {
     
     DT::datatable(
       values$summary_model$res_comp %>%
-        mutate_if(is.numeric, function(x) prettyNum(x, big.mark = " ")),
+        mutate_if(is.numeric, function(x) prettyNum(x, big.mark = " ")),
       options = list(
         searching = FALSE,
         paging = FALSE,
@@ -899,5 +917,72 @@ shinyServer(function(input, output, session) {
     n <- values$nTimedep
     values$nTimedep <- n + 1
   }) 
+  
+  output$tablePSA <- renderDataTable({
+    req(values$model, values$psa)
+        values$psa$run_model %>%
+          mutate_if(is.numeric, function(x) prettyNum(x, big.mark = " "))
+      
+  }, options = list(searching = FALSE,
+                    paging = FALSE,
+                    info = FALSE))
+  
+  observeEvent(input$startPSA, {
+    req(values$model)
+    values$psa <- ux_run_psa(input, values)
+  })
+  
+  output$plotCEPlane <- renderUI({
+    req(values$psa)
+    tagList(
+      shinydashboard::box(
+        width = 6,
+        title = "Cost-effectiveness plane",
+        renderPlot(plot(values$psa, type = "ce"))
+      )
+    )
+  })
+  output$plotACEVPI <- renderUI({
+    req(values$psa)
+    tagList(
+      shinydashboard::box(
+        width = 6,
+        title = "Acceptability curve",
+        renderPlot(plot(values$psa, type = "ac", max_wtp = input$maxCEA, log_scale = input$logScaleCEA))
+      ),
+      shinydashboard::box(
+        width = 6,
+        title = "Expected Value of Perfect Information",
+        renderPlot(plot(values$psa, type = "evpi", max_wtp = input$maxCEA, log_scale = input$logScaleCEA))
+      ),
+      shinydashboard::box(
+        width = 6,
+        sliderInput("maxCEA", "Max Threshold", min = 0, max = 200000, value = 30000, step = 1000, sep=" "),
+        checkboxInput("logScaleCEA", "Log Scale", FALSE)
+      )
+    )
+  })
+  output$plotCov <- renderUI({
+    req(values$psa)
+    tagList(
+      shinydashboard::box(
+        width = 6,
+        title = "Covariance analysis by strategy",
+        renderPlot(plot(values$psa, type = "cov")),
+        collapsible = TRUE,
+        collapsed = TRUE
+      ),
+      shinydashboard::box(
+        width = 6,
+        title = "Covariance analysis of difference",
+        renderPlot(plot(values$psa, type = "cov", diff = TRUE, threshold = input$maxCov)),
+        sliderInput("maxCov", "Max Threshold", min = 0, max = 200000, value = 30000, step = 1000, sep=" "),
+        collapsible = TRUE,
+        collapsed = TRUE
+      )
+    )
+  })
+  
+  
 })
 

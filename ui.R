@@ -345,7 +345,6 @@ function(request) {
               )
             ),
             mainPanel(
-              actionButton("reload_results", "Reload", icon = icon("refresh")),
               uiOutput("outModel"),
               DT::dataTableOutput("tableResults"),
               uiOutput("titleICER"),
@@ -357,6 +356,29 @@ function(request) {
               uiOutput("outValues"),
               plotOutput("plotValues")
             )
+          )
+        ),
+        shinydashboard::tabItem(
+          tabName = "tab_psa_results",
+          fluidRow(
+            shinydashboard::box(
+              width = 4,
+              numericInput("nIterations", "Number of iterations", 100, max = 10000, min = 10),
+              actionButton("startPSA", "Start", class="btn-success")
+              ),
+            shinydashboard::box(
+              width = 8,
+              dataTableOutput("tablePSA")
+            )
+          ),
+          fluidRow(
+            column(12, uiOutput("plotCEPlane"))
+          ),
+          fluidRow(
+            column(12, uiOutput("plotACEVPI"))
+          ),
+          fluidRow(
+            column(12, uiOutput("plotCov"))
           )
         )
       ),

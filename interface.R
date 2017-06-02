@@ -290,7 +290,8 @@ ux_model <- function(input, values, model_number) {
     states = ux_state_list(
       input = input,
       model_number = model_number
-    )
+    ),
+    starting_values = heemod::define_starting_values()
   ) 
 }
 
@@ -399,4 +400,41 @@ ux_run_dsa <- function(input, values) {
       low_dots = lazyeval::as.lazy_dots(low),
       high_dots = lazyeval::as.lazy_dots(high)
     ))
+}
+
+ux_run_psa <- function(input, values){
+  arguments <- purrr::map_chr(seq_len(values$nProbabilistic), function(i) {
+    name <- if (input[[paste0("PSADistrib", i)]] != "Multinomial"){
+      input[[paste0("PSAGlobalParamName", i)]]
+    } else {
+      purrr::map_chr(seq_len(input[[paste0("PSAParam1", i)]]), function(j){
+        input[[paste_("PSAMultinomName", i, j)]]
+      }) %>%
+      paste(collapse = " + ")
+    }
+    parameters <- if (input[[paste0("PSADistrib", i)]] == "Multinomial"){
+      purrr::map_chr(seq_len(input[[paste0("PSAParam1", i)]]), function(j){
+        input[[paste_("PSAMultinomValue", i, j)]]
+      }) %>%
+        paste(collapse = ", ")
+    } else if (input[[paste0("PSADistrib", i)]] == "Lognormal"){
+      mean_arg <- ifelse("Mean" %in% input[[paste0("PSALogscale", i)]], "meanlog", "mean")
+      sd_arg <- ifelse("SD" %in% input[[paste0("PSALogscale", i)]], "sdlog", "sd")
+      sprintf("%s = %s, %s = %s", mean_arg, input[[paste0("PSAParam1", i)]], sd_arg, input[[paste0("PSAParam2", i)]])
+    } else if (input[[paste0("PSADistrib", i)]] == "Triangle"){
+      input[[paste0("PSAParam1", i)]]
+    } else {
+      sprintf("%s, %s", input[[paste0("PSAParam1", i)]], input[[paste0("PSAParam2", i)]])
+    }
+    sprintf("%s ~ %s(%s)", name, tolower(input[[paste0("PSADistrib", i)]]), parameters)
+  })
+  
+  heemod::run_psa(
+    model = values$model,
+    psa = heemod::define_psa_(
+      lazyeval::as.lazy_dots(arguments)
+    ),
+    N = input$nIterations
+  )
+    
 }
