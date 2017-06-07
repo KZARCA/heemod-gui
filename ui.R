@@ -389,7 +389,7 @@ function(request) {
             em("heemod by KZ & AFP"),
             br(),
             tags$a(
-              href = "https://pierucci.github.io/heemod/",
+              href = "https://github.com/KZARCA/heemod-gui",
               "More info",
               target="_blank"
             )
