@@ -57,7 +57,7 @@ filter_fun_lazydots <- function(dots){
 filter_fun <- function(expr){
   all_funs <- pryr::fun_calls(expr)
   authorized <- c("+", "-", "/", "*", "^", "log", "log10", "exp", 
-                  "sqrt", "median", "max", "min", "ifelse",
+                  "sqrt", "mean", "median", "max", "min", "ifelse",
                   "==", "!=", "(", ">", "<", ">=", "<=", "::",
                   "heemod", "discount", "get_who_mr")
   all_funs[!all_funs %in% authorized]
