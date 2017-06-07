@@ -15,7 +15,7 @@ shinyServer(function(input, output, session) {
   values <- reactiveValues(nGlobalParameters = 1, nEquation = 0, nRgho = 0, nSurvival = 0, 
                            nTimedep = 0, nDeterministic = 0, nProbabilistic = 0, moduleEdit = FALSE,
                            removeDSA = FALSE, removePSA = FALSE)
-  local_values <- reactiveValues(restoring = 0, restoring_time = Sys.time(), show_masker = FALSE, all_updated = FALSE)
+  local_values <- reactiveValues(prerestoring = FALSE, restoring = 0, restoring_time = Sys.time(), show_masker = FALSE, all_updated = FALSE) #prerestoring is used to prevent observe_prerestore to trigger before the end of restoration
 
   onBookmark(function(state) {
     nameValues <- names(reactiveValuesToList(values))
@@ -30,7 +30,7 @@ shinyServer(function(input, output, session) {
       values[[x]] <- state$values[[x]]
     })
     local_values$last_tab <- input$main
-    
+    local_values$prerestoring <- TRUE
   })
   
   onRestored(function(state) {
@@ -44,7 +44,6 @@ shinyServer(function(input, output, session) {
     local_values$restoring <- 1
     local_values$restoring_time <- Sys.time()
   })
-  
   
   observe({
     req(local_values$restoring > 0)
@@ -102,6 +101,16 @@ shinyServer(function(input, output, session) {
       "addProbabilistic"
     )
   )
+  
+  observe_prerestore <- observe({
+    if(local_values$prerestoring) {
+      req(local_values$restoring == local_values$final_restore)
+    }
+    ux_parameters(input, values, eval = FALSE)
+    ux_cost(input)
+    ux_effect(input)
+    purrr::walk(seq_len(ux_nb_models(input)), ~ ux_state_list(input, .))
+  })
   
   observe({ ##?WHY??
     output$searchCountry <- renderUI({
@@ -225,17 +234,19 @@ shinyServer(function(input, output, session) {
   
   
   output$costVariable <- renderUI({
+    req(input$variableStateName1)
     textInput(
       "costVariable",
       label = "Cost Variable",
-      value = ifelse(!is.null(input$costVariable), input$costVariable, ifelse(!is.null(input$variableStateName1), input$variableStateName1, NA))
+      value = ifelse(!is.null(isolate(input$costVariable)), isolate(input$costVariable), input$variableStateName1)
     )
   })
   output$effectVariable <- renderUI({
+    req(input$variableStateName2)
     textInput(
       "effectVariable",
       label = "Effect Variable",
-      value = ifelse(!is.null(input$effectVariable), input$effectVariable, ifelse(!is.null(input$variableStateName2), input$variableStateName2, NA))
+      value = isolate(ifelse(!is.null(isolate(input$effectVariable)), isolate(input$effectVariable), input$variableStateName2))
     )
   })
   

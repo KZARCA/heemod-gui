@@ -10,6 +10,59 @@
 # AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
 #
 
+find_unauthorized <- function(list_object, ...){
+  dots <- list(...)
+  x <- dots$x
+  y <- dots$y
+  
+  list_obj_name <- substitute(list_object) %>%
+    paste_(x, y)
+  
+  unauthorized <- try({
+    purrr::compact(
+      filter_fun_lazydots(
+        lazyeval::as.lazy_dots(
+          list_object
+        )
+      )
+    )})
+    if ("try-error" %in% class(unauthorized)){
+      showNotification(id = paste_("input_error", list_obj_name), type = "error", "Input error")
+      return(TRUE)
+    } else if(length(unauthorized)){
+      purrr::map2_chr(unauthorized, names(unauthorized), function(x, name){
+        if (length(x) == 1){
+          sprintf("Function %s is not authorized (%s)", x, name)
+        } else {
+          sprintf("Functions %s are not authorized (%s)", paste(x, collapse = ", "), name)
+        } 
+      }) %>%
+        paste(collapse = "\n") %>%
+        showNotification(id = paste_("unauthorized_fun", list_obj_name), ., type = "error", duration = NULL)
+      removeNotification(paste_("input_error", list_obj_name))
+      return(TRUE)
+    } else {
+      removeNotification(paste_("unauthorized_fun", list_obj_name))
+      removeNotification(paste_("input_error", list_obj_name))
+      return(FALSE)
+    }
+}
+
+filter_fun_lazydots <- function(dots){
+  purrr::map(dots, function(x){
+    filter_fun(x$expr)
+  })
+}
+
+filter_fun <- function(expr){
+  all_funs <- pryr::fun_calls(expr)
+  authorized <- c("+", "-", "/", "*", "^", "log", "log10", "exp", 
+                  "sqrt", "median", "max", "min", "ifelse",
+                  "==", "!=", "(", ">", "<", ">=", "<=", "::",
+                  "heemod", "discount", "get_who_mr")
+  all_funs[!all_funs %in% authorized]
+}
+
 paste_ <- function(...){
   paste(..., sep = "_")
 }
