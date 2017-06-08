@@ -61,6 +61,10 @@ function(request) {
           shinydashboard::menuSubItem(
             HTML("Probabilistic Sensitivity Analysis"),
             tabName = "tab_psa_results"
+          ),
+          shinydashboard::menuSubItem(
+            HTML("Deterministic Sensitivity Analysis"),
+            tabName = "tab_dsa_results"
           )
           )
     )),
@@ -288,11 +292,7 @@ function(request) {
         shinydashboard::tabItem(
           tabName = "tab_dsa",
           fluidRow(
-            uiOutput("DSA"),
-            uiOutput("outDSA"),
-            tags$br(),
-            uiOutput("plotDSA"),
-            tags$br()
+            uiOutput("DSA")
           )
         ),
         shinydashboard::tabItem(
@@ -380,6 +380,11 @@ function(request) {
           fluidRow(
             column(12, uiOutput("plotCov"))
           )
+        ),
+        shinydashboard::tabItem(
+          tabName = "tab_dsa_results",
+          uiOutput("outDSA"),
+          uiOutput("plotDSA")
         )
       ),
       wellPanel(
