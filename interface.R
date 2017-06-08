@@ -400,26 +400,26 @@ ux_run_dsa <- function(input, values) {
   
   n <- unlist(shiny_subset(
     input,
-    paste0("DSAGlobalParamName", seq_len(values$nDeterministic)-1)
+    paste0("DSAGlobalParamName", seq_len(values$nDeterministic))
   ))
   
   low <- stats::setNames(
     shiny_subset(
       input,
-      paste0("minDSAValue", seq_len(values$nDeterministic)-1)
+      paste0("minDSAValue", seq_len(values$nDeterministic))
     ),
     n)
   
   high <- stats::setNames(
     shiny_subset(
       input,
-      paste0("maxDSAValue", seq_len(values$nDeterministic)-1)
+      paste0("maxDSAValue", seq_len(values$nDeterministic))
     ),
     n)
   
   heemod::run_dsa(
     model = values$model,
-    dsa = heemod::define_dsa_(
+    dsa = heemod:::define_dsa_(
       par_names = n,
       low_dots = lazyeval::as.lazy_dots(low),
       high_dots = lazyeval::as.lazy_dots(high)
