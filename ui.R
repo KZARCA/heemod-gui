@@ -131,7 +131,7 @@ function(request) {
             )
           ),
           fluidRow(
-            uiOutput("nameStates"),
+            
             uiOutput("nameStrategies")
           ),
           conditionalPanel(
