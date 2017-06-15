@@ -277,6 +277,7 @@ ux_state <- function(input, model_number, state_number) {
 }
 
 ux_state_list <- function(input, model_number) {
+  req(input$nbStates)
   nb_states <- ux_nb_states(input)
   list_states <- lapply(
     seq_len(nb_states),
