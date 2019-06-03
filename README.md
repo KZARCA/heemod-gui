@@ -10,10 +10,6 @@ With `heemod-gui`, no coding is necessary to build a Decision Model in Health Ec
 
 Right now, [heemod vignettes](https://cran.r-project.org/web/packages/heemod/vignettes/) from `a` to `f` can be reproduced on `heemod-gui`.
 
-## Demo
-
-You can try heemod on https://icer.io/
-
 ## Devs
 
 [Kevin Zarca](http://www.urc-eco.fr/Kevin-ZARCA,402) and [Antoine Filipović-Pierucci](https://pierucci.org).
